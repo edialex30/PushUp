@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { computeStats } from '../public/js/stats.js';
+import { computeStats, hourlyStatsForDay } from '../public/js/stats.js';
 
 test('empty history yields zeros', () => {
   const s = computeStats([], '2026-07-06');
@@ -68,4 +68,48 @@ test('best streak finds longest consecutive run', () => {
     { date: '2026-07-06', reps: 100, goal: 100 },
   ];
   assert.equal(computeStats(days, '2026-07-06').bestStreak, 3);
+});
+
+test('hourlyStatsForDay groups workout sessions by hour', () => {
+  const day = {
+    date: '2026-07-06',
+    reps: 25,
+    goal: 100,
+    sessions: [
+      { id: 'a', hour: '08:00', reps: 10 },
+      { id: 'b', hour: '18:00', reps: 5 },
+      { id: 'c', hour: '18:00', reps: 10 },
+    ],
+  };
+
+  assert.deepEqual(hourlyStatsForDay(day), [
+    { hour: '08:00', reps: 10 },
+    { hour: '18:00', reps: 15 },
+  ]);
+});
+
+test('hourlyStatsForDay preserves legacy daily totals without sessions', () => {
+  const day = { date: '2026-07-06', reps: 25, goal: 100 };
+
+  assert.deepEqual(hourlyStatsForDay(day), [
+    { hour: 'Total zi', reps: 25 },
+  ]);
+});
+
+test('hourlyStatsForDay shows manual corrections when daily total exceeds session reps', () => {
+  const day = {
+    date: '2026-07-06',
+    reps: 30,
+    goal: 100,
+    sessions: [
+      { id: 'a', hour: '08:00', reps: 10 },
+      { id: 'b', hour: '18:00', reps: 5 },
+    ],
+  };
+
+  assert.deepEqual(hourlyStatsForDay(day), [
+    { hour: '08:00', reps: 10 },
+    { hour: '18:00', reps: 5 },
+    { hour: 'Corectie', reps: 15 },
+  ]);
 });
