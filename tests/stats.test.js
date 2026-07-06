@@ -6,9 +6,33 @@ test('empty history yields zeros', () => {
   const s = computeStats([], '2026-07-06');
   assert.deepEqual(s, {
     total: 0, bestDay: 0, average: 0,
-    currentStreak: 0, bestStreak: 0, metGoalToday: false,
+    currentStreak: 0, bestStreak: 0,
+    activeStreak: 0, streakPending: false,
+    metGoalToday: false,
     recentTotal: 0, trend: 'flat',
   });
+});
+
+test('streak stays alive as pending while today is still in progress', () => {
+  const days = [
+    { date: '2026-07-04', reps: 100, goal: 100 },
+    { date: '2026-07-05', reps: 100, goal: 100 },
+    { date: '2026-07-06', reps: 30, goal: 100 }, // today not met yet
+  ];
+  const s = computeStats(days, '2026-07-06');
+  assert.equal(s.currentStreak, 0);
+  assert.equal(s.activeStreak, 2);
+  assert.equal(s.streakPending, true);
+});
+
+test('met-today streak is active and not pending', () => {
+  const days = [
+    { date: '2026-07-05', reps: 100, goal: 100 },
+    { date: '2026-07-06', reps: 100, goal: 100 },
+  ];
+  const s = computeStats(days, '2026-07-06');
+  assert.equal(s.activeStreak, 2);
+  assert.equal(s.streakPending, false);
 });
 
 test('trend compares last 7 days against the previous 7 days', () => {

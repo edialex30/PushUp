@@ -4,7 +4,7 @@ import { createCalibratedCounter, extractFrontFeatures } from './calibrated-coun
 import { runAutoCalibration } from './calibration-flow.js';
 import { LM, evaluatePushupPose } from './pose-gate.js';
 import { createVoice } from './voice.js';
-import { computeStats, hourlyStatsByDay } from './stats.js?v=cloud-history-2';
+import { computeStats, hourlyStatsByDay } from './stats.js?v=cloud-history-3';
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
@@ -416,7 +416,8 @@ function renderStats() {
   $('stat-total').textContent = stats.total;
   $('stat-average').textContent = stats.average;
   $('stat-best').textContent = stats.bestDay;
-  $('stat-streak').textContent = stats.currentStreak;
+  $('stat-streak').textContent = stats.activeStreak > 0 ? `🔥 ${stats.activeStreak}` : '0';
+  $('streak-hint').textContent = stats.streakPending ? '(azi in curs)' : '';
   $('stat-best-streak').textContent = stats.bestStreak;
 
   const done = state.today.reps;

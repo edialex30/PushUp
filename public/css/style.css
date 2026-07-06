@@ -567,3 +567,9 @@ h1 {
 .trend.flat {
   color: var(--muted);
 }
+
+.streak-hint {
+  color: var(--warn);
+  font-size: 11px;
+  font-weight: 700;
+}

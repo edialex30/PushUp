@@ -58,12 +58,21 @@ export function computeStats(days, today) {
     return !!e && e.reps >= e.goal;
   };
 
-  let currentStreak = 0;
-  let cursor = today;
-  while (met(cursor)) {
-    currentStreak += 1;
-    cursor = prevDate(cursor);
-  }
+  const streakEndingAt = date => {
+    let n = 0;
+    let cursor = date;
+    while (met(cursor)) {
+      n += 1;
+      cursor = prevDate(cursor);
+    }
+    return n;
+  };
+
+  const currentStreak = streakEndingAt(today);
+  // If today's goal isn't met yet, keep yesterday's streak alive as "pending"
+  // so the user sees what is still at stake instead of a bare zero.
+  const activeStreak = currentStreak > 0 ? currentStreak : streakEndingAt(prevDate(today));
+  const streakPending = currentStreak === 0 && activeStreak > 0;
 
   const sorted = [...days].sort((a, b) => a.date.localeCompare(b.date));
   let bestStreak = 0;
@@ -96,6 +105,7 @@ export function computeStats(days, today) {
   return {
     total, bestDay, average,
     currentStreak, bestStreak,
+    activeStreak, streakPending,
     metGoalToday: met(today),
     recentTotal, trend,
   };
