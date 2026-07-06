@@ -33,3 +33,10 @@ test('app uses pose readiness to reject bodies that are too small in frame', () 
   assert.match(appJs, /evaluatePushupPose/);
   assert.match(appJs, /body-too-small/);
 });
+
+test('today screen shows current date and time instead of static Azi eyebrow', () => {
+  assert.match(indexHtml, /id="today-datetime"/);
+  assert.doesNotMatch(indexHtml, /<p class="eyebrow">Azi<\/p>/);
+  assert.match(appJs, /formatCurrentDateTime/);
+  assert.match(appJs, /setInterval\(renderClock,\s*60000\)/);
+});
