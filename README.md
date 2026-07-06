@@ -1,57 +1,81 @@
 # PushUp Counter
 
-Aplicatie web locala care numara automat flotarile prin camera telefonului si le scade dintr-o tinta zilnica. Datele raman pe laptop, in reteaua ta locala.
+Aplicatie web statica pentru telefon, publicabila pe GitHub Pages. Numara automat flotarile prin camera telefonului, scade din tinta zilnica si pastreaza istoricul in browserul telefonului.
 
-## Instalare
+## Folosire pe telefon
 
-Ruleaza o singura data:
+1. Deschide linkul publicat pe GitHub Pages.
+2. Accepta accesul la camera.
+3. Alege camera `Spate` sau `Fata`.
+4. Sprijina telefonul lateral, la 1-2 metri, astfel incat camera sa te vada din profil.
+5. Apasa `Start antrenament`.
 
-```bash
-npm install
-node scripts/fetch-vendor.mjs
-```
+Aplicatia merge cu laptopul inchis dupa ce este publicata pe GitHub Pages.
 
-Scriptul descarca local Chart.js, MediaPipe Tasks Vision si modelul Pose Landmarker.
+## Date locale
 
-## Pornire
+Datele se salveaza in `localStorage`, in browserul telefonului:
 
-```bash
-npm start
-```
+- tinta zilnica
+- istoricul pe zile
+- camera preferata
 
-Serverul afiseaza adresele disponibile, de forma:
-
-```text
-https://192.168.1.15:3443
-https://localhost:3443
-```
-
-## Pe telefon
-
-1. Conecteaza telefonul la aceeasi retea Wi-Fi ca laptopul.
-2. Deschide adresa `https://<ip-laptop>:3443` in browser.
-3. La avertismentul de certificat, intra la optiuni avansate si continua catre pagina locala.
-4. Accepta accesul la camera.
-5. Sprijina telefonul lateral, la 1-2 metri, astfel incat camera sa te vada din profil.
-6. Apasa `Start antrenament`.
+Istoricul nu se sincronizeaza intre telefoane. Daca schimbi telefonul/browserul sau stergi datele site-ului, istoricul local se pierde.
 
 ## Cum functioneaza
 
 - Camera ruleaza in browserul telefonului.
 - Detectia corpului se face local cu MediaPipe Pose.
 - O flotare este numarata cand bratul trece din pozitia sus, in pozitia jos, apoi inapoi sus.
-- Fiecare repetare se trimite la server si se salveaza in `data/history.json`.
-- Daca telefonul pierde conexiunea temporar, repetarile se tin in coada si se retrimit la urmatorul succes.
+- Fiecare repetare se salveaza direct in browser.
+- Daca detectia numara gresit, poti corecta manual campul `Flotari azi`.
 
 ## Setari
 
-Tinta zilnica se schimba din ecranul `Azi`.
+Din ecranul `Azi` poti schimba:
+
+- tinta zilnica
+- cate flotari ai facut azi
+
+Din ecranul `Antrenament` poti alege camera:
+
+- `Spate` pentru camera principala
+- `Fata` pentru camera frontala
 
 Pragurile implicite pentru numarare sunt in [public/js/rep-counter.js](public/js/rep-counter.js):
 
 - brat intins: peste 150 de grade
 - brat indoit: sub 90 de grade
 - vizibilitate minima landmark: 0.5
+
+## Dezvoltare locala
+
+Instalare:
+
+```bash
+npm install
+node scripts/fetch-vendor.mjs
+```
+
+Pornire locala optionala:
+
+```bash
+npm start
+```
+
+Serverul local este util pentru testare pe laptop/telefon, dar aplicatia publicata nu depinde de el.
+
+## Publicare pe GitHub Pages
+
+Repo-ul include workflow-ul `.github/workflows/pages.yml`, care publica automat folderul `public/`.
+
+Pasii in GitHub:
+
+1. Intra in repository settings.
+2. Deschide `Pages`.
+3. La `Build and deployment`, alege `GitHub Actions`.
+4. Impinge codul pe `master` sau `main`.
+5. Dupa ce workflow-ul trece, deschide linkul afisat de GitHub Pages.
 
 ## Teste
 
@@ -64,5 +88,4 @@ npm test
 Acestea nu sunt comise in git:
 
 - `certs/` - certificatul HTTPS self-signed
-- `data/history.json` - istoricul tau de flotari
 - `node_modules/` - dependentele npm
