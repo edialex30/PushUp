@@ -6,9 +6,12 @@ Aplicatie web statica pentru telefon, publicabila pe GitHub Pages. Numara automa
 
 1. Deschide linkul publicat pe GitHub Pages.
 2. Accepta accesul la camera.
-3. Alege camera `Spate` sau `Fata`.
-4. Sprijina telefonul lateral, la 1-2 metri, astfel incat camera sa te vada din profil.
+3. Camera implicita este `Fata`.
+4. Pune telefonul in fata ta, astfel incat sa iti vada ambele brate.
 5. Apasa `Start antrenament`.
+6. Stai in pozitia de sus si apasa `Salveaza Sus`.
+7. Stai in pozitia de jos si apasa `Salveaza Jos`.
+8. Incepe antrenamentul.
 
 Aplicatia merge cu laptopul inchis dupa ce este publicata pe GitHub Pages.
 
@@ -26,9 +29,10 @@ Istoricul nu se sincronizeaza intre telefoane. Daca schimbi telefonul/browserul 
 
 - Camera ruleaza in browserul telefonului.
 - Detectia corpului se face local cu MediaPipe Pose.
-- O flotare este numarata cand bratul trece din pozitia sus, in pozitia jos, apoi inapoi sus.
+- O flotare este numarata cand miscarea seamana cu tranzitia calibrata `Sus -> Jos -> Sus`.
 - Fiecare repetare se salveaza direct in browser.
 - Daca detectia numara gresit, poti corecta manual campul `Flotari azi`.
+- Vocea numara repetarile in engleza: `one`, `two`, `three`, etc.
 
 ## Setari
 
@@ -39,8 +43,10 @@ Din ecranul `Azi` poti schimba:
 
 Din ecranul `Antrenament` poti alege camera:
 
+- `Fata` pentru camera frontala, implicit
 - `Spate` pentru camera principala
-- `Fata` pentru camera frontala
+
+Tot din `Antrenament` poti recalibra pozitiile `Sus` si `Jos` oricand schimbi locul telefonului.
 
 Pragurile implicite pentru numarare sunt in [public/js/rep-counter.js](public/js/rep-counter.js):
 

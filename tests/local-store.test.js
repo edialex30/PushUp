@@ -25,7 +25,8 @@ test('returns default state when storage is empty', () => {
 
   assert.deepEqual(store.getState(), {
     goal: 100,
-    cameraMode: 'environment',
+    cameraMode: 'user',
+    calibration: null,
     today: { date: '2026-07-06', reps: 0, goal: 100, remaining: 100 },
     days: [],
   });
@@ -88,4 +89,40 @@ test('setCameraMode persists front or back camera preference', () => {
   });
 
   assert.equal(next.getState().cameraMode, 'user');
+});
+
+test('old storage without schema version migrates to front camera by default', () => {
+  const storage = memoryStorage({
+    'pushup-counter-state-v1': JSON.stringify({
+      goal: 100,
+      cameraMode: 'environment',
+      days: [],
+    }),
+  });
+  const store = createLocalStore({
+    storage,
+    today: () => '2026-07-06',
+  });
+
+  assert.equal(store.getState().cameraMode, 'user');
+});
+
+test('setCalibration persists up and down snapshots', () => {
+  const storage = memoryStorage();
+  const store = createLocalStore({
+    storage,
+    today: () => '2026-07-06',
+  });
+  const calibration = {
+    up: { leftAngle: 160, rightAngle: 158, wristY: 0.7, shoulderY: 0.35 },
+    down: { leftAngle: 90, rightAngle: 92, wristY: 0.72, shoulderY: 0.48 },
+  };
+
+  store.setCalibration(calibration);
+  const next = createLocalStore({
+    storage,
+    today: () => '2026-07-06',
+  });
+
+  assert.deepEqual(next.getState().calibration, calibration);
 });
