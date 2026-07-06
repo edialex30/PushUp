@@ -1,0 +1,14 @@
+{
+  "name": "pushup-counter",
+  "version": "1.0.0",
+  "description": "Local web app that auto-counts push-ups via phone camera",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "selfsigned": "^2.4.1"
+  }
+}
