@@ -9,9 +9,10 @@ Aplicatie web statica pentru telefon, publicabila pe GitHub Pages. Numara automa
 3. Camera implicita este `Fata`.
 4. Pune telefonul in fata ta, astfel incat sa iti vada ambele brate.
 5. Apasa `Start antrenament`.
-6. Stai in pozitia de sus si apasa `Salveaza Sus`.
-7. Stai in pozitia de jos si apasa `Salveaza Jos`.
-8. Incepe antrenamentul.
+6. Apasa `Calibreaza automat`.
+7. Ai 5 secunde sa asezi telefonul la aproximativ 1 metru de tine.
+8. Urmeaza vocea: tine pozitia `Sus`, apoi pozitia `Jos`, pana cand auzi `Calibration done`.
+9. Incepe antrenamentul.
 
 Aplicatia merge cu laptopul inchis dupa ce este publicata pe GitHub Pages.
 
@@ -46,13 +47,9 @@ Din ecranul `Antrenament` poti alege camera:
 - `Fata` pentru camera frontala, implicit
 - `Spate` pentru camera principala
 
-Tot din `Antrenament` poti recalibra pozitiile `Sus` si `Jos` oricand schimbi locul telefonului.
+Tot din `Antrenament` poti rula `Calibreaza automat` oricand schimbi locul telefonului sau lumina.
 
-Pragurile implicite pentru numarare sunt in [public/js/rep-counter.js](public/js/rep-counter.js):
-
-- brat intins: peste 150 de grade
-- brat indoit: sub 90 de grade
-- vizibilitate minima landmark: 0.5
+Logica de numarare calibrata este in [public/js/calibrated-counter.js](public/js/calibrated-counter.js), iar flow-ul hands-free de calibrare este in [public/js/calibration-flow.js](public/js/calibration-flow.js).
 
 ## Dezvoltare locala
 

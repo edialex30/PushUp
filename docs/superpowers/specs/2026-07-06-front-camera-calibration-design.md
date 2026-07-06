@@ -11,11 +11,20 @@ Aplicatia trebuie sa functioneze cu telefonul pus in fata utilizatorului, folosi
 
 - Camera implicita devine `Fata`.
 - Vocea numara repetarile in engleza: `one`, `two`, `three`, etc.
-- In ecranul de antrenament exista doua butoane de calibrare:
-  - `Salveaza Sus`
-  - `Salveaza Jos`
+- In ecranul de antrenament exista un singur buton `Calibreaza automat`.
+- Dupa apasarea butonului, utilizatorul are 5 secunde sa aseze telefonul la distanta.
+- Aplicatia vorbeste instructiunile in engleza:
+  - `Get ready`
+  - countdown `five`, `four`, `three`, `two`, `one`
+  - `Hold up position`
+  - countdown `three`, `two`, `one`, apoi salveaza pozitia `Sus`
+  - `Hold down position`
+  - countdown `three`, `two`, `one`, apoi salveaza pozitia `Jos`
+  - `Calibration done`
 - O repetare este valida doar cand miscarea seamana cu tranzitia calibrata `Sus -> Jos -> Sus`.
 - Daca nu exista calibrare, aplicatia cere calibrare inainte sa numere.
+- In timpul calibrarii automate nu se numara repetari.
+- Daca aplicatia nu vede clar bratele la capturarea unei pozitii, calibrarea se opreste si utilizatorul trebuie sa o reporneasca.
 
 ## Date Salvate
 
@@ -35,3 +44,4 @@ Calibrarea se salveaza in `localStorage` langa restul datelor:
 - Teste pentru default camera frontala si persistenta calibrarii.
 - Teste pentru textul vocal englezesc.
 - Teste pentru contorul calibrat: nu numara fara calibrare, numara `up -> down -> up`, ignora miscari mici.
+- Teste pentru flow-ul de calibrare automata: salveaza `up` si `down`, esueaza fara features valide, nu salveaza cand este anulat.
