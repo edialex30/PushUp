@@ -40,3 +40,7 @@ test('today screen shows current date and time instead of static Azi eyebrow', (
   assert.match(appJs, /formatCurrentDateTime/);
   assert.match(appJs, /setInterval\(renderClock,\s*60000\)/);
 });
+
+test('index uses a fresh app script version for hourly stats release', () => {
+  assert.match(indexHtml, /app\.js\?v=hourly-stats-1/);
+});
