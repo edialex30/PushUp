@@ -98,7 +98,7 @@ export async function runAutoCalibration({
     : { ok: false, reason: down.reason };
 
   const calibration = { up: up.features, down: down.features };
-  saveCalibration(calibration);
+  await saveCalibration(calibration);
   setStatus('Calibrare terminata. Poti incepe.');
   say('Calibration done');
   return { ok: true, calibration };

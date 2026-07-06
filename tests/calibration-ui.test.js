@@ -42,6 +42,6 @@ test('today screen shows current date and time instead of static Azi eyebrow', (
   assert.match(appJs, /setInterval\(renderClock,\s*60000\)/);
 });
 
-test('index uses a fresh app script version for hourly stats release', () => {
-  assert.match(indexHtml, /app\.js\?v=daily-hourly-stats-1/);
+test('index uses a fresh app script version for cloud history release', () => {
+  assert.match(indexHtml, /app\.js\?v=cloud-history-1/);
 });
