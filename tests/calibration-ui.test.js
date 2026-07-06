@@ -26,7 +26,8 @@ test('workout counting writes reps into an active session and displays the daily
 
 test('stats screen exposes hourly workout breakdown', () => {
   assert.match(indexHtml, /id="hourly-list"/);
-  assert.match(appJs, /hourlyStatsForDay/);
+  assert.match(indexHtml, />Pe ore, fiecare zi</);
+  assert.match(appJs, /hourlyStatsByDay/);
 });
 
 test('app uses pose readiness to reject bodies that are too small in frame', () => {
@@ -42,5 +43,5 @@ test('today screen shows current date and time instead of static Azi eyebrow', (
 });
 
 test('index uses a fresh app script version for hourly stats release', () => {
-  assert.match(indexHtml, /app\.js\?v=hourly-stats-1/);
+  assert.match(indexHtml, /app\.js\?v=daily-hourly-stats-1/);
 });

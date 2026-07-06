@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { computeStats, hourlyStatsForDay } from '../public/js/stats.js';
+import { computeStats, hourlyStatsByDay, hourlyStatsForDay } from '../public/js/stats.js';
 
 test('empty history yields zeros', () => {
   const s = computeStats([], '2026-07-06');
@@ -111,5 +111,53 @@ test('hourlyStatsForDay shows manual corrections when daily total exceeds sessio
     { hour: '08:00', reps: 10 },
     { hour: '18:00', reps: 5 },
     { hour: 'Corectie', reps: 15 },
+  ]);
+});
+
+test('hourlyStatsByDay returns hourly rows for every day, newest first', () => {
+  const days = [
+    {
+      date: '2026-07-05',
+      reps: 12,
+      goal: 100,
+      sessions: [
+        { id: 'a', hour: '09:00', reps: 5 },
+        { id: 'b', hour: '20:00', reps: 7 },
+      ],
+    },
+    {
+      date: '2026-07-06',
+      reps: 30,
+      goal: 100,
+      sessions: [
+        { id: 'c', hour: '08:00', reps: 10 },
+        { id: 'd', hour: '08:00', reps: 15 },
+      ],
+    },
+    {
+      date: '2026-07-04',
+      reps: 0,
+      goal: 100,
+      sessions: [],
+    },
+  ];
+
+  assert.deepEqual(hourlyStatsByDay(days), [
+    {
+      date: '2026-07-06',
+      reps: 30,
+      hourly: [
+        { hour: '08:00', reps: 25 },
+        { hour: 'Corectie', reps: 5 },
+      ],
+    },
+    {
+      date: '2026-07-05',
+      reps: 12,
+      hourly: [
+        { hour: '09:00', reps: 5 },
+        { hour: '20:00', reps: 7 },
+      ],
+    },
   ]);
 });
