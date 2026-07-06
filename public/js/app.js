@@ -1,15 +1,21 @@
-import { createLocalStore } from './local-store.js';
-import { createPoseTracker } from './pose.js';
+import { createCloudStore } from './cloud-store.js';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from './supabase-config.js';
 import { createCalibratedCounter, extractFrontFeatures } from './calibrated-counter.js';
 import { runAutoCalibration } from './calibration-flow.js';
 import { LM, evaluatePushupPose } from './pose-gate.js';
 import { createVoice } from './voice.js';
 import { computeStats, hourlyStatsByDay } from './stats.js';
 
-const store = createLocalStore();
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+  },
+});
 const voice = createVoice();
 const $ = id => document.getElementById(id);
 
+let store = null;
 let state = null;
 let tracker = null;
 let counter = null;
@@ -25,6 +31,12 @@ let isStartingWorkout = false;
 let isWorkoutActive = false;
 let activeSessionId = null;
 let clockTimer = null;
+let poseTrackerLoader = null;
+
+async function loadPoseTracker() {
+  poseTrackerLoader ??= import('./pose.js').then(module => module.createPoseTracker);
+  return poseTrackerLoader;
+}
 
 function formatCurrentDateTime(date = new Date()) {
   return new Intl.DateTimeFormat('ro-RO', {
@@ -39,6 +51,27 @@ function formatCurrentDateTime(date = new Date()) {
 function renderClock() {
   const target = $('today-datetime');
   if (target) target.textContent = formatCurrentDateTime();
+}
+
+function setAuthVisible(visible) {
+  $('auth-screen').hidden = !visible;
+  document.querySelector('.app-shell').hidden = visible;
+  document.querySelector('.tabs').hidden = visible;
+}
+
+function renderSyncStatus() {
+  const status = store?.getSyncStatus?.() || { state: 'pending', message: 'Se incarca...' };
+  const target = $('sync-status');
+  if (!target) return;
+  target.textContent = status.message;
+  target.classList.toggle('failed', status.state === 'failed');
+  target.classList.toggle('pending', status.state === 'pending');
+}
+
+function renderAccount(user) {
+  $('account-bar').hidden = !user;
+  $('account-email').textContent = user?.email || '';
+  renderSyncStatus();
 }
 
 function showScreen(name) {
@@ -69,32 +102,37 @@ function renderToday() {
 }
 
 function refresh() {
+  if (!store) return;
   state = store.getState();
   goalAnnounced = state.today.remaining === 0;
   renderToday();
+  renderSyncStatus();
 }
 
 $('goal-form').addEventListener('submit', async event => {
   event.preventDefault();
   const goal = parseInt($('goal-input').value, 10);
   if (!Number.isInteger(goal) || goal < 1) return;
-  state = store.setGoal(goal);
+  state = await store.setGoal(goal);
   goalAnnounced = state.today.remaining === 0;
   renderToday();
+  renderSyncStatus();
 });
 
-$('manual-reps-form').addEventListener('submit', event => {
+$('manual-reps-form').addEventListener('submit', async event => {
   event.preventDefault();
   const reps = parseInt($('manual-reps-input').value, 10);
   if (!Number.isInteger(reps) || reps < 0) return;
-  state = store.setTodayReps(reps);
+  state = await store.setTodayReps(reps);
   goalAnnounced = state.today.remaining === 0;
   renderToday();
+  renderSyncStatus();
 });
 
-$('camera-mode').addEventListener('change', event => {
-  state = store.setCameraMode(event.target.value);
+$('camera-mode').addEventListener('change', async event => {
+  state = await store.setCameraMode(event.target.value);
   renderToday();
+  renderSyncStatus();
 });
 
 function renderCalibration() {
@@ -125,9 +163,10 @@ async function startAutoCalibration() {
 
   const result = await runAutoCalibration({
     getFeatures: () => currentFeatures,
-    saveCalibration(calibration) {
-      state = store.setCalibration(calibration);
+    async saveCalibration(calibration) {
+      state = await store.setCalibration(calibration);
       counter = createCalibratedCounter({ calibration: state.calibration });
+      renderSyncStatus();
     },
     setStatus(message) {
       $('detect-status').textContent = message;
@@ -243,9 +282,10 @@ async function onLandmarks(marks) {
 
   if (!result.counted) return;
 
-  state = store.addReps(1, { sessionId: activeSessionId });
+  state = await store.addReps(1, { sessionId: activeSessionId });
   $('rep-count').textContent = state.today.reps;
   renderToday();
+  renderSyncStatus();
   voice.count(state.today.reps);
   if (state.today.remaining === 0 && !goalAnnounced) {
     goalAnnounced = true;
@@ -280,13 +320,14 @@ async function startWorkout() {
       return;
     }
 
-    state = store.startSession();
+    state = await store.startSession();
     activeSessionId = state.sessionId;
     counter = createCalibratedCounter({ calibration: state.calibration });
     currentFeatures = null;
     $('rep-count').textContent = state.today.reps;
     noBodyAnnounced = false;
     renderToday();
+    renderSyncStatus();
     if (navigator.wakeLock) {
       try {
         wakeLock = await navigator.wakeLock.request('screen');
@@ -294,6 +335,7 @@ async function startWorkout() {
     }
 
     $('detect-status').textContent = 'Incarc detectia...';
+    const createPoseTracker = await loadPoseTracker();
     tracker = await createPoseTracker({ video, onLandmarks });
     if (session !== workoutSession) {
       tracker.close?.();
@@ -307,7 +349,7 @@ async function startWorkout() {
   } catch (err) {
     console.error(err);
     if (stream) stream.getTracks().forEach(track => track.stop());
-    $('detect-status').textContent = 'Camera nu a pornit. Verifica permisiunea si HTTPS.';
+    $('detect-status').textContent = 'Camera sau detectia nu a pornit. Verifica permisiunea si HTTPS.';
   } finally {
     if (session === workoutSession) {
       isStartingWorkout = false;
@@ -327,8 +369,9 @@ async function stopWorkout() {
     tracker = null;
   }
   if (activeSessionId) {
-    state = store.finishSession(activeSessionId);
+    state = await store.finishSession(activeSessionId);
     activeSessionId = null;
+    renderSyncStatus();
   }
 
   const video = $('video');
@@ -417,6 +460,49 @@ function renderStats() {
   });
 }
 
-refresh();
-renderClock();
-clockTimer = setInterval(renderClock, 60000);
+async function initApp() {
+  renderClock();
+  clockTimer = setInterval(renderClock, 60000);
+
+  const { data: sessionData } = await supabase.auth.getSession();
+  const user = sessionData.session?.user || null;
+  if (!user) {
+    setAuthVisible(true);
+    return;
+  }
+
+  setAuthVisible(false);
+  renderAccount(user);
+  store = await createCloudStore({ supabase, user });
+  refresh();
+  renderSyncStatus();
+}
+
+$('auth-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  $('auth-message').textContent = 'Se autentifica...';
+  const email = $('auth-email').value.trim();
+  const password = $('auth-password').value;
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) {
+    $('auth-message').textContent = error.message;
+    return;
+  }
+  $('auth-message').textContent = '';
+  setAuthVisible(false);
+  renderAccount(data.user);
+  store = await createCloudStore({ supabase, user: data.user });
+  refresh();
+  renderSyncStatus();
+});
+
+$('btn-sign-out').addEventListener('click', async () => {
+  await stopWorkout();
+  await supabase.auth.signOut();
+  store = null;
+  state = null;
+  setAuthVisible(true);
+  renderAccount(null);
+});
+
+initApp();

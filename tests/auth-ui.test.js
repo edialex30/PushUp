@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 const indexHtml = readFileSync(new URL('../public/index.html', import.meta.url), 'utf8');
 const css = readFileSync(new URL('../public/css/style.css', import.meta.url), 'utf8');
 const config = readFileSync(new URL('../public/js/supabase-config.js', import.meta.url), 'utf8');
+const appJs = readFileSync(new URL('../public/js/app.js', import.meta.url), 'utf8');
 
 test('index loads Supabase before app module', () => {
   const supabaseIndex = indexHtml.indexOf('supabase-js');
@@ -31,4 +32,17 @@ test('auth styles exist', () => {
 test('Supabase config uses the approved project URL', () => {
   assert.match(config, /https:\/\/pkpqafyfwpoykniusghx\.supabase\.co/);
   assert.match(config, /SUPABASE_ANON_KEY/);
+});
+
+test('app initializes Supabase auth before rendering store state', () => {
+  assert.match(appJs, /createClient\(SUPABASE_URL,\s*SUPABASE_ANON_KEY/);
+  assert.match(appJs, /createCloudStore/);
+  assert.match(appJs, /initApp/);
+});
+
+test('app awaits cloud store mutations', () => {
+  assert.match(appJs, /state\s*=\s*await\s+store\.setGoal/);
+  assert.match(appJs, /state\s*=\s*await\s+store\.setTodayReps/);
+  assert.match(appJs, /state\s*=\s*await\s+store\.addReps/);
+  assert.match(appJs, /state\s*=\s*await\s+store\.finishSession/);
 });
