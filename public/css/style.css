@@ -508,3 +508,62 @@ h1 {
     width: 100%;
   }
 }
+
+.today-progress {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.today-progress-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.today-progress-head strong {
+  color: var(--fg);
+  font-size: 18px;
+}
+
+.progress-track {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: var(--accent);
+  transition: width 0.35s ease;
+}
+
+.progress-fill.done {
+  background: linear-gradient(90deg, var(--accent), #86efac);
+}
+
+.trend {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.trend.up {
+  color: var(--accent);
+}
+
+.trend.down {
+  color: var(--danger);
+}
+
+.trend.flat {
+  color: var(--muted);
+}

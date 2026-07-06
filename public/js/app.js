@@ -4,7 +4,7 @@ import { createCalibratedCounter, extractFrontFeatures } from './calibrated-coun
 import { runAutoCalibration } from './calibration-flow.js';
 import { LM, evaluatePushupPose } from './pose-gate.js';
 import { createVoice } from './voice.js';
-import { computeStats, hourlyStatsByDay } from './stats.js';
+import { computeStats, hourlyStatsByDay } from './stats.js?v=cloud-history-2';
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
@@ -395,6 +395,21 @@ async function stopWorkout() {
 $('btn-start').addEventListener('click', startWorkout);
 $('btn-stop').addEventListener('click', stopWorkout);
 
+function lastSevenDays(days, today) {
+  const byDate = new Map(days.map(day => [day.date, day.reps]));
+  const [y, m, d] = today.split('-').map(Number);
+  const result = [];
+  for (let offset = 6; offset >= 0; offset -= 1) {
+    const dt = new Date(y, m - 1, d - offset);
+    const yy = dt.getFullYear();
+    const mm = String(dt.getMonth() + 1).padStart(2, '0');
+    const dd = String(dt.getDate()).padStart(2, '0');
+    const date = `${yy}-${mm}-${dd}`;
+    result.push({ date, reps: byDate.get(date) || 0 });
+  }
+  return result;
+}
+
 function renderStats() {
   if (!state) return;
   const stats = computeStats(state.days, state.today.date);
@@ -404,9 +419,23 @@ function renderStats() {
   $('stat-streak').textContent = stats.currentStreak;
   $('stat-best-streak').textContent = stats.bestStreak;
 
-  const lastDays = [...state.days]
-    .sort((a, b) => a.date.localeCompare(b.date))
-    .slice(-14);
+  const done = state.today.reps;
+  const goal = state.today.goal;
+  const percent = goal > 0 ? Math.min(100, Math.round((done / goal) * 100)) : 0;
+  $('progress-reps').textContent = done;
+  $('progress-goal').textContent = goal;
+  $('progress-percent').textContent = percent;
+  const fill = $('progress-fill');
+  fill.style.width = `${percent}%`;
+  fill.classList.toggle('done', percent >= 100);
+
+  const trendEl = $('stat-trend');
+  const trendGlyph = { up: '▲', down: '▼', flat: '—' };
+  trendEl.textContent = trendGlyph[stats.trend] || '';
+  trendEl.classList.remove('up', 'down', 'flat');
+  trendEl.classList.add(stats.trend);
+
+  const lastDays = lastSevenDays(state.days, state.today.date);
   const hourlyByDay = hourlyStatsByDay(state.days);
 
   $('hourly-list').innerHTML = hourlyByDay.length
@@ -437,6 +466,8 @@ function renderStats() {
         backgroundColor: '#35c46a',
         borderColor: '#86efac',
         borderWidth: 1,
+        maxBarThickness: 48,
+        borderRadius: 6,
       }],
     },
     options: {

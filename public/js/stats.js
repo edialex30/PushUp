@@ -1,11 +1,15 @@
-function prevDate(dateStr) {
+function shiftDate(dateStr, delta) {
   const [y, m, d] = dateStr.split('-').map(Number);
   const dt = new Date(y, m - 1, d);
-  dt.setDate(dt.getDate() - 1);
+  dt.setDate(dt.getDate() + delta);
   const yy = dt.getFullYear();
   const mm = String(dt.getMonth() + 1).padStart(2, '0');
   const dd = String(dt.getDate()).padStart(2, '0');
   return `${yy}-${mm}-${dd}`;
+}
+
+function prevDate(dateStr) {
+  return shiftDate(dateStr, -1);
 }
 
 export function hourlyStatsForDay(day) {
@@ -27,7 +31,7 @@ export function hourlyStatsForDay(day) {
     .map(([hour, reps]) => ({ hour, reps }));
   const sessionTotal = rows.reduce((sum, row) => sum + row.reps, 0);
   if (Number.isInteger(day.reps) && day.reps > sessionTotal) {
-    rows.push({ hour: 'Corectie', reps: day.reps - sessionTotal });
+    rows.push({ hour: 'Adaugat manual', reps: day.reps - sessionTotal });
   }
   return rows;
 }
@@ -78,9 +82,21 @@ export function computeStats(days, today) {
     prev = d.date;
   }
 
+  const recentStart = shiftDate(today, -6);
+  const prevStart = shiftDate(today, -13);
+  const prevEnd = shiftDate(today, -7);
+  let recentTotal = 0;
+  let prevTotal = 0;
+  for (const d of days) {
+    if (d.date >= recentStart && d.date <= today) recentTotal += d.reps;
+    else if (d.date >= prevStart && d.date <= prevEnd) prevTotal += d.reps;
+  }
+  const trend = recentTotal > prevTotal ? 'up' : recentTotal < prevTotal ? 'down' : 'flat';
+
   return {
     total, bestDay, average,
     currentStreak, bestStreak,
     metGoalToday: met(today),
+    recentTotal, trend,
   };
 }

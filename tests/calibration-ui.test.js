@@ -43,5 +43,5 @@ test('today screen shows current date and time instead of static Azi eyebrow', (
 });
 
 test('index uses a fresh app script version for cloud history release', () => {
-  assert.match(indexHtml, /app\.js\?v=cloud-history-1/);
+  assert.match(indexHtml, /app\.js\?v=cloud-history-2/);
 });

@@ -7,7 +7,24 @@ test('empty history yields zeros', () => {
   assert.deepEqual(s, {
     total: 0, bestDay: 0, average: 0,
     currentStreak: 0, bestStreak: 0, metGoalToday: false,
+    recentTotal: 0, trend: 'flat',
   });
+});
+
+test('trend compares last 7 days against the previous 7 days', () => {
+  const up = computeStats([
+    { date: '2026-06-25', reps: 10, goal: 100 }, // previous window
+    { date: '2026-07-02', reps: 40, goal: 100 }, // recent window
+    { date: '2026-07-06', reps: 30, goal: 100 }, // recent window
+  ], '2026-07-06');
+  assert.equal(up.recentTotal, 70);
+  assert.equal(up.trend, 'up');
+
+  const down = computeStats([
+    { date: '2026-06-26', reps: 90, goal: 100 }, // previous window
+    { date: '2026-07-06', reps: 20, goal: 100 }, // recent window
+  ], '2026-07-06');
+  assert.equal(down.trend, 'down');
 });
 
 test('totals, best and average', () => {
@@ -110,7 +127,7 @@ test('hourlyStatsForDay shows manual corrections when daily total exceeds sessio
   assert.deepEqual(hourlyStatsForDay(day), [
     { hour: '08:00', reps: 10 },
     { hour: '18:00', reps: 5 },
-    { hour: 'Corectie', reps: 15 },
+    { hour: 'Adaugat manual', reps: 15 },
   ]);
 });
 
@@ -148,7 +165,7 @@ test('hourlyStatsByDay returns hourly rows for every day, newest first', () => {
       reps: 30,
       hourly: [
         { hour: '08:00', reps: 25 },
-        { hour: 'Corectie', reps: 5 },
+        { hour: 'Adaugat manual', reps: 5 },
       ],
     },
     {

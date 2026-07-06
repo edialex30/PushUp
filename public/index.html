@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>PushUp Counter</title>
-  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="./css/style.css?v=cloud-history-2" />
 </head>
 <body>
   <section id="auth-screen" class="auth-screen" aria-labelledby="auth-title" hidden>
@@ -98,9 +98,17 @@
         </div>
       </header>
 
+      <div class="today-progress">
+        <div class="today-progress-head">
+          <span>Azi</span>
+          <strong><span id="progress-reps">0</span> / <span id="progress-goal">0</span> · <span id="progress-percent">0</span>%</strong>
+        </div>
+        <div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div>
+      </div>
+
       <div class="stat-grid">
         <div class="stat"><span id="stat-total">0</span><label>Total</label></div>
-        <div class="stat"><span id="stat-average">0</span><label>Medie/zi</label></div>
+        <div class="stat"><span id="stat-average">0</span><label>Medie/zi <span id="stat-trend" class="trend"></span></label></div>
         <div class="stat"><span id="stat-best">0</span><label>Record/zi</label></div>
         <div class="stat"><span id="stat-streak">0</span><label>Serie</label></div>
         <div class="stat"><span id="stat-best-streak">0</span><label>Record serie</label></div>
@@ -125,6 +133,6 @@
 
   <script src="./vendor/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script type="module" src="./js/app.js?v=cloud-history-1"></script>
+  <script type="module" src="./js/app.js?v=cloud-history-2"></script>
 </body>
 </html>
