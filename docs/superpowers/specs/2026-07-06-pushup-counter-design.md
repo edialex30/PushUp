@@ -36,7 +36,7 @@ Laptop (Windows)                      Telefon (browser)
 
 ### 1. Server (`server.js`)
 
-Node.js, fără framework sau cu Express minimal. Responsabilități:
+Node.js cu Express (singura dependență de runtime, plus `selfsigned` pentru certificat). Responsabilități:
 
 - Servește fișierele statice din `public/`.
 - **HTTPS obligatoriu** (getUserMedia cere secure context): la prima pornire generează automat un certificat self-signed în `certs/` și îl refolosește la pornirile următoare.
