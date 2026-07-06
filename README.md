@@ -1,6 +1,6 @@
 # PushUp Counter
 
-Aplicatie web statica pentru telefon, publicabila pe GitHub Pages. Numara automat flotarile prin camera telefonului, scade din tinta zilnica si pastreaza istoricul in browserul telefonului.
+Aplicatie web statica pentru telefon, publicabila pe GitHub Pages. Numara automat flotarile prin camera telefonului, scade din tinta zilnica si pastreaza istoricul in Supabase dupa login.
 
 ## Folosire pe telefon
 
@@ -16,22 +16,28 @@ Aplicatie web statica pentru telefon, publicabila pe GitHub Pages. Numara automa
 
 Aplicatia merge cu laptopul inchis dupa ce este publicata pe GitHub Pages.
 
-## Date locale
+## Date in cloud
 
-Datele se salveaza in `localStorage`, in browserul telefonului:
+Aplicatia foloseste GitHub Pages pentru hosting si Supabase pentru login + istoric persistent.
+
+Datele principale se salveaza in Supabase:
 
 - tinta zilnica
 - istoricul pe zile
+- sesiunile pe ore
 - camera preferata
+- calibrarile pentru camera fata/spate
 
-Istoricul nu se sincronizeaza intre telefoane. Daca schimbi telefonul/browserul sau stergi datele site-ului, istoricul local se pierde.
+Browserul pastreaza si o copie locala pentru pornire rapida si fallback temporar daca internetul pica. Sursa principala ramane Supabase dupa login.
+
+Prima data te loghezi cu email si parola. Telefonul pastreaza sesiunea, deci nu trebuie sa te loghezi zilnic.
 
 ## Cum functioneaza
 
 - Camera ruleaza in browserul telefonului.
 - Detectia corpului se face local cu MediaPipe Pose.
 - O flotare este numarata cand miscarea seamana cu tranzitia calibrata `Sus -> Jos -> Sus`.
-- Fiecare repetare se salveaza direct in browser.
+- Fiecare repetare se salveaza in Supabase si intr-o copie locala de fallback.
 - Daca detectia numara gresit, poti corecta manual campul `Flotari azi`.
 - Vocea numara repetarile in engleza: `one`, `two`, `three`, etc.
 
@@ -67,6 +73,15 @@ npm start
 ```
 
 Serverul local este util pentru testare pe laptop/telefon, dar aplicatia publicata nu depinde de el.
+
+## Setup Supabase
+
+1. Creeaza un user in Supabase Auth pentru emailul tau.
+2. Ruleaza SQL-ul din `docs/superpowers/specs/2026-07-06-cloud-history-design.md`.
+3. Verifica in Supabase ca tabela `pushup_states` are Row Level Security activ.
+4. Publica aplicatia pe GitHub Pages.
+5. Deschide aplicatia pe telefon si logheaza-te.
+6. Daca exista istoric local si cloud-ul este gol, aplicatia il urca automat.
 
 ## Publicare pe GitHub Pages
 

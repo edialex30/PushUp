@@ -6,6 +6,7 @@ const indexHtml = readFileSync(new URL('../public/index.html', import.meta.url),
 const css = readFileSync(new URL('../public/css/style.css', import.meta.url), 'utf8');
 const config = readFileSync(new URL('../public/js/supabase-config.js', import.meta.url), 'utf8');
 const appJs = readFileSync(new URL('../public/js/app.js', import.meta.url), 'utf8');
+const readme = readFileSync(new URL('../README.md', import.meta.url), 'utf8');
 
 test('index loads Supabase before app module', () => {
   const supabaseIndex = indexHtml.indexOf('supabase-js');
@@ -45,4 +46,10 @@ test('app awaits cloud store mutations', () => {
   assert.match(appJs, /state\s*=\s*await\s+store\.setTodayReps/);
   assert.match(appJs, /state\s*=\s*await\s+store\.addReps/);
   assert.match(appJs, /state\s*=\s*await\s+store\.finishSession/);
+});
+
+test('README documents Supabase cloud history setup', () => {
+  assert.match(readme, /Supabase/);
+  assert.match(readme, /pushup_states/);
+  assert.match(readme, /GitHub Pages/);
 });
