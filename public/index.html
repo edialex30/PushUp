@@ -3,7 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0e1117" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="PushUp" />
   <title>PushUp Counter</title>
+  <link rel="manifest" href="./manifest.json?v=v01-tag" />
   <link rel="stylesheet" href="./css/style.css?v=v01-tag" />
 </head>
 <body>
@@ -131,6 +137,22 @@
     <button data-screen="stats" class="tab" type="button">Statistici</button>
   </nav>
 
+  <script>
+    // Register the service worker so the installed home-screen app always
+    // pulls the latest version when online. Reload once when a new worker
+    // takes control, so the user sees updates without any manual refresh.
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+      let reloadedForUpdate = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (reloadedForUpdate) return;
+        reloadedForUpdate = true;
+        window.location.reload();
+      });
+    }
+  </script>
   <script src="./vendor/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script type="module" src="./js/app.js?v=v01-tag"></script>

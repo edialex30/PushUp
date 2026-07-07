@@ -50,3 +50,11 @@ test('today screen shows current date and time instead of static Azi eyebrow', (
 test('index uses a fresh app script version for cache busting', () => {
   assert.match(indexHtml, /app\.js\?v=v01-tag/);
 });
+
+test('index registers a service worker and links a manifest for self-updating install', () => {
+  assert.match(indexHtml, /serviceWorker\.register\('\.\/sw\.js'\)/);
+  assert.match(indexHtml, /rel="manifest"/);
+  const swJs = readFileSync(new URL('../public/sw.js', import.meta.url), 'utf8');
+  assert.match(swJs, /skipWaiting/);
+  assert.match(swJs, /fetch\(request\)/);
+});

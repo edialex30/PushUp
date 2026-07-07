@@ -1,0 +1,10 @@
+{
+  "name": "PushUp Counter",
+  "short_name": "PushUp",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0e1117",
+  "theme_color": "#0e1117",
+  "orientation": "portrait"
+}
