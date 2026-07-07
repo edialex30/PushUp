@@ -59,3 +59,9 @@ without being asked:**
 Do not stop at "committed" — the change is not live on the phone until it is
 pushed to `main` and the Pages workflow finishes (~1 min). After that the user
 just reloads the page (the new `?v=` makes it fetch fresh files).
+
+The app is a PWA: `public/sw.js` is a **network-first** service worker so the
+installed home-screen app always loads the latest deploy when online (offline
+fallback to cache) and auto-reloads when a new worker takes control. So a
+plain push-to-main is enough for the phone to self-update — no manual steps.
+If you ever need to force-purge old caches, bump `CACHE_VERSION` in `sw.js`.
