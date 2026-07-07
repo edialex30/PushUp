@@ -34,3 +34,28 @@ All agents on this canvas share a memory. Your task prompt may end with a
 - Do not re-add facts already in the index; adding with the same --name
   overwrites (use it to correct an entry).
 <!-- CZY_AGENT_INSTRUCTIONS_END -->
+
+## Deployment — ALWAYS auto-update the phone
+
+This app is hosted on **GitHub Pages** (workflow `.github/workflows/pages.yml`,
+which publishes `public/` on every push to `main`). Supabase is only for
+login + history, NOT hosting. The user runs the app on their phone and wants
+it to update itself automatically, like an app that self-updates.
+
+So **every time you change anything under `public/` (JS/CSS/HTML), you MUST,
+without being asked:**
+
+1. Bump the cache-bust query string `?v=...` in `public/index.html` for the
+   changed assets (`app.js`, `style.css`) AND the matching import inside
+   `app.js` (e.g. `./stats.js?v=<same-version>`). The browser caches by URL,
+   so an unchanged `?v=` means the phone keeps serving the OLD file even after
+   deploy. Also update the test in `tests/calibration-ui.test.js` that pins
+   the version string.
+2. `npm test` and make sure it passes.
+3. Commit, then **`git push origin main`** — this is what triggers the Pages
+   deploy. A local commit alone does nothing for the phone.
+4. Optionally confirm the deploy with `gh run list --workflow=pages.yml`.
+
+Do not stop at "committed" — the change is not live on the phone until it is
+pushed to `main` and the Pages workflow finishes (~1 min). After that the user
+just reloads the page (the new `?v=` makes it fetch fresh files).
