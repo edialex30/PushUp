@@ -4,7 +4,7 @@ import { createCalibratedCounter, extractFrontFeatures } from './calibrated-coun
 import { runAutoCalibration } from './calibration-flow.js';
 import { LM, evaluatePushupPose } from './pose-gate.js';
 import { createVoice } from './voice.js';
-import { computeStats, hourlyStatsByDay } from './stats.js?v=cloud-history-3';
+import { computeStats, hourlyStatsForDay } from './stats.js?v=cloud-history-3';
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
@@ -22,6 +22,7 @@ let counter = null;
 let currentFeatures = null;
 let wakeLock = null;
 let chart = null;
+let selectedStatsDay = null;
 let noBodyAnnounced = false;
 let goalAnnounced = false;
 let autoCalibrating = false;
@@ -437,24 +438,34 @@ function renderStats() {
   trendEl.classList.add(stats.trend);
 
   const lastDays = lastSevenDays(state.days, state.today.date);
-  const hourlyByDay = hourlyStatsByDay(state.days);
 
-  $('hourly-list').innerHTML = hourlyByDay.length
-    ? hourlyByDay.map(day => `
-      <section class="hourly-day">
-        <div class="hourly-day-title">
-          <span>${day.date}</span>
-          <strong>${day.reps}</strong>
-        </div>
-        ${day.hourly.map(item => `
+  // Keep the current selection if it's still in the visible 7-day window,
+  // otherwise fall back to today.
+  const visibleDates = lastDays.map(day => day.date);
+  if (!selectedStatsDay || !visibleDates.includes(selectedStatsDay)) {
+    selectedStatsDay = state.today.date;
+  }
+
+  const selectedDay = state.days.find(day => day.date === selectedStatsDay);
+  const selectedHourly = hourlyStatsForDay(selectedDay);
+  const selectedReps = selectedDay && Number.isInteger(selectedDay.reps) ? selectedDay.reps : 0;
+
+  $('hourly-list').innerHTML = `
+    <section class="hourly-day">
+      <div class="hourly-day-title">
+        <span>${selectedStatsDay}</span>
+        <strong>${selectedReps}</strong>
+      </div>
+      ${selectedHourly.length
+        ? selectedHourly.map(item => `
           <div class="hour-row">
             <span>${item.hour}</span>
             <strong>${item.reps}</strong>
           </div>
-        `).join('')}
-      </section>
-    `).join('')
-    : '<p class="empty-state">Nu ai serii salvate inca.</p>';
+        `).join('')
+        : '<p class="empty-state">Nicio serie in aceasta zi.</p>'}
+    </section>
+  `;
 
   if (chart) chart.destroy();
   chart = new window.Chart($('chart'), {
@@ -464,7 +475,7 @@ function renderStats() {
       datasets: [{
         label: 'Flotari',
         data: lastDays.map(day => day.reps),
-        backgroundColor: '#35c46a',
+        backgroundColor: lastDays.map(day => day.date === selectedStatsDay ? '#86efac' : '#35c46a'),
         borderColor: '#86efac',
         borderWidth: 1,
         maxBarThickness: 48,
@@ -474,6 +485,18 @@ function renderStats() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      onClick: (event, elements) => {
+        if (!elements.length) return;
+        const picked = lastDays[elements[0].index];
+        if (picked && picked.date !== selectedStatsDay) {
+          selectedStatsDay = picked.date;
+          renderStats();
+        }
+      },
+      onHover: (event, elements) => {
+        const target = event.native && event.native.target;
+        if (target) target.style.cursor = elements.length ? 'pointer' : 'default';
+      },
       plugins: {
         legend: { display: false },
       },

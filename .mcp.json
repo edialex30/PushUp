@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "czy": {
+      "command": "node",
+      "args": [
+        "C:/Users/epopa/Desktop/CZY/dist-electron/czy-cli.cjs",
+        "mcp"
+      ]
+    }
+  }
+}
