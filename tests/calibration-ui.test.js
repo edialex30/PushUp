@@ -48,5 +48,5 @@ test('today screen shows current date and time instead of static Azi eyebrow', (
 });
 
 test('index uses a fresh app script version for cache busting', () => {
-  assert.match(indexHtml, /app\.js\?v=single-day-hourly/);
+  assert.match(indexHtml, /app\.js\?v=v01-tag/);
 });

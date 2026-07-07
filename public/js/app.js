@@ -4,7 +4,7 @@ import { createCalibratedCounter, extractFrontFeatures } from './calibrated-coun
 import { runAutoCalibration } from './calibration-flow.js';
 import { LM, evaluatePushupPose } from './pose-gate.js';
 import { createVoice } from './voice.js';
-import { computeStats, hourlyStatsForDay } from './stats.js?v=single-day-hourly';
+import { computeStats, hourlyStatsForDay } from './stats.js?v=v01-tag';
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
